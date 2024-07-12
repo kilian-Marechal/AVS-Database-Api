@@ -8,8 +8,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+model Avs {
+  id      Int     @id @default(autoincrement())
+  address String  @unique
+  name    String?
+
+  // Computed values
+  operatorCount Int?
+  restakerCount Int?
+  totalRestaked Float?
+
+  operators               Operator[]                @relation("AvsOperators")
+  restakers               Restaker[]                @relation("AvsRestakers")
+  OperatorAvsRegistration OperatorAvsRegistration[]
+}
+
+model Operator {
+  id      Int     @id @default(autoincrement())
+  address String  @unique
+  name    String?
+
+  // Computed values
+  restakerCount Int?
+  totalRestaked Float?
+
+  avss                    Avs[]                     @relation("AvsOperators")
+  restakers               Restaker[]                @relation("OperatorRestakers")
+  OperatorAvsRegistration OperatorAvsRegistration[]
+}
+
+model Restaker {
+  id       Int     @id @default(autoincrement())
+  address  String  @unique
+  name     String?
+  ethValue Float?
+
+  avss      Avs[]      @relation("AvsRestakers")
+  operators Operator[] @relation("OperatorRestakers")
+}
+
+model OperatorAvsRegistration {
+  id              Int     @id @default(autoincrement())
+  graphId         String  @unique
+  status          Boolean
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+  operatorId      Int
+  avsId           Int
+
+  operator Operator @relation(fields: [operatorId], references: [id])
+  avs      Avs      @relation(fields: [avsId], references: [id])
 }
