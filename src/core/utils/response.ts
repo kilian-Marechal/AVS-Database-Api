@@ -1,13 +1,10 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
-import { corsHeaders, versionHeaders } from './headers'
+import { versionHeaders } from './headers'
 
-type Params = { cors?: { origin: string } }
-
-export function httpResponse(response: APIGatewayProxyResult, params?: Params): APIGatewayProxyResult {
+export function httpResponse(response: APIGatewayProxyResult): APIGatewayProxyResult {
   return {
     statusCode: response.statusCode,
     headers: {
-      ...(params?.cors !== undefined && corsHeaders(params.cors.origin)),
       ...versionHeaders,
       ...response.headers,
     },
