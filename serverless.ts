@@ -7,14 +7,12 @@ import { version } from './src/core/environment/version'
 import { stage } from './src/core/environment/environment'
 import { log } from './src/core/modules/logger'
 import validateEnv from './src/core/environment/envalid'
-import { allowedOrigins } from './src/core/utils/headers'
 import { versionTag, serviceName, awsRegion } from './src/core/environment/aws'
 import type { AWS } from '@serverless/typescript'
 
 log.pinoInfo(`Deploying with NODE_ENV=${process.env.NODE_ENV}`, {
   additionalData: {
     action: 'deployment',
-    allowedOrigins, // Remove if not using Cors
   },
 })
 
@@ -37,49 +35,36 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs18.x',
     // @ts-ignore
     region: awsRegion,
-    profile: 'nefture-security',
+    profile: 'hackathon-july-2024',
     stage: `${stage}-${versionTag}`,
     tags: {
-      // [TEMPLATE] add tags
-      type: 'template',
+      // TODO add tags
     },
-    // [TEMPLATE] setup the VPC
+    // TODO setup the VPC
     vpc: {
       securityGroupIds: ['sg-072c511e659f6ed7b'],
       subnetIds: ['subnet-0196a83aeedb924be'],
     },
-    // [TEMPLATE] setup IAM roles if needed
+    // TODO setup IAM roles when needed
     iamRoleStatements: [],
     environment: {
       SERVICE_VERSION: version,
     },
   },
   functions: {
-    postEndpoint: {
-      name: `postEndpoint-${stage}-${versionTag}-${serviceName}`,
-      handler: 'src/functions/postEndpoint.handler', // Path to worker function
+    // TODO Rename once decided
+    receiveOperatorRegistrationEvents: {
+      name: `receiveOperatorRegistrationEvents-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/receiveOperatorRegistrationEvents.handler', // Path to worker function
       timeout: 1, // Timeout in seconds
       events: [
         {
           http: {
-            path: `postEndpoint`,
+            path: `receiveOperatorRegistrationEvents`,
             method: 'post',
-            // [TEMPLATE] remove if not needing cors headers
-            cors: {
-              allowCredentials: true,
-              headers: ['Content-Type', 'X-API-KEY'],
-              maxAge: 86400,
-              methods: ['POST', 'OPTIONS'],
-              origins: allowedOrigins,
-            },
           },
         },
       ],
-    },
-    awsEventRequest: {
-      name: `awsEventRequest-${stage}-${versionTag}-${serviceName}`,
-      handler: 'src/functions/awsEventRequest.handler', // Path to worker function
-      timeout: 1, // Timeout in seconds
     },
   },
   package: {

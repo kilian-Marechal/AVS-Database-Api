@@ -13,11 +13,7 @@ function prettyPrintMissingVariables(missingVars: string[]): string {
 type BaseEnv = {
   NODE_ENV: string
   NODE_NAME: string
-  REDIS_HOST: string
-  REDIS_PORT: number
   DATABASE_URL: string
-  API_KEY_1: string
-  API_KEY_2: string
 }
 
 type AwsEnv = BaseEnv & {
@@ -29,11 +25,7 @@ export function validateEnv(): Readonly<BaseEnv | AwsEnv> {
   const env = cleanEnv(process.env, {
     NODE_ENV: str({ choices: ['development', 'staging', 'production', 'test'] }),
     NODE_NAME: str(),
-    REDIS_HOST: str(),
-    REDIS_PORT: num(),
     DATABASE_URL: str(),
-    API_KEY_1: str(),
-    API_KEY_2: str(),
     DEPLOYMENT_AWS_ACCOUNT_ID: str({ default: undefined }),
     DEPLOYMENT_AWS_REGION: str({ default: undefined }),
   })

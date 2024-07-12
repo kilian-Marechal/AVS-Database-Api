@@ -1,4 +1,4 @@
-# serverless-template
+# AVS-Database-Api
 
 [TEMPLATE]
 {project description}
