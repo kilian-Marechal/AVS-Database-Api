@@ -1,4 +1,4 @@
 const avs_directory_subgraph_url = process.env.AVS_DIRECTORY_SUBGRAPH_URL
-const all_avs_subgraph_url = process.env.ALL_AVS_SUBGRAPH_URL
+const eigenlayer_delegation_subgraph_url = process.env.EIGENLAYER_DELEGATION_SUBGRAPH_URL
 
-export { avs_directory_subgraph_url, all_avs_subgraph_url }
+export { avs_directory_subgraph_url, eigenlayer_delegation_subgraph_url }

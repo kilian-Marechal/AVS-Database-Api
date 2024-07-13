@@ -1,12 +1,12 @@
 import { avs_directory_subgraph_url } from '../environment/theGraph'
 import { GraphOperatorRegistrationBody } from '../types'
 
-export async function fetchNewOperatorAVSStatusUpdates(latestBlockNumber: number) {
+export async function fetchOperatorAvsStatusUpdates(latestBlockNumber: number) {
   if (!avs_directory_subgraph_url) throw new Error('avs_directory_subgraph_url is undefined')
 
   const QUERY = `
     query FetchOperatorAVSRegistrations($blockNumber: Int!, $first: Int!, $skip: Int!) {
-      operatorAVSRegistrationStatusUpdateds(
+      OperatorAVSRegistrationStatusUpdateds(
         where: { blockNumber_gt: $blockNumber }
         first: $first
         skip: $skip
@@ -56,15 +56,15 @@ export async function fetchNewOperatorAVSStatusUpdates(latestBlockNumber: number
       throw new Error(`GraphQL error: ${errors.map((error: any) => error.message).join(', ')}`)
     }
 
-    const { operatorAVSRegistrationStatusUpdateds } = data
+    const { OperatorAVSRegistrationStatusUpdateds } = data
 
-    if (operatorAVSRegistrationStatusUpdateds.length < first) {
+    if (OperatorAVSRegistrationStatusUpdateds.length < first) {
       hasMore = false
     } else {
       skip += first
     }
 
-    results.push(...operatorAVSRegistrationStatusUpdateds)
+    results.push(...OperatorAVSRegistrationStatusUpdateds)
   }
 
   return results

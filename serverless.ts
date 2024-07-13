@@ -84,6 +84,63 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    stakerDelegationsUpdate: {
+      name: `stakerDelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/stakerDelegationsUpdate.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `stakerDelegationsUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
+    stakerUndelegationsUpdate: {
+      name: `stakerUndelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/stakerUndelegationsUpdate.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `stakerUndelegationsUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
+    stakerForceUndelegationsUpdate: {
+      name: `stakerForceUndelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/stakerForceUndelegationsUpdate.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `stakerForceUndelegationsUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     // Exclude resources from webpack execution

@@ -39,9 +39,12 @@ model Operator {
   restakerCount Int?
   totalRestaked Float?
 
-  avss                    Avs[]                     @relation("AvsOperators")
-  restakers               Restaker[]                @relation("OperatorRestakers")
-  OperatorAvsRegistration OperatorAvsRegistration[]
+  avss                             Avs[]                              @relation("AvsOperators")
+  restakers                        Restaker[]                         @relation("OperatorRestakers")
+  OperatorAvsRegistration          OperatorAvsRegistration[]
+  StakerOperatorDelegations        StakerOperatorDelegations[]
+  StakerOperatorUndelegations      StakerOperatorUndelegations[]
+  StakerOperatorForceUndelegations StakerOperatorForceUndelegations[]
 }
 
 model Restaker {
@@ -50,8 +53,11 @@ model Restaker {
   name     String?
   ethValue Float?
 
-  avss      Avs[]      @relation("AvsRestakers")
-  operators Operator[] @relation("OperatorRestakers")
+  avss                             Avs[]                              @relation("AvsRestakers")
+  operators                        Operator[]                         @relation("OperatorRestakers")
+  StakerOperatorDelegations        StakerOperatorDelegations[]
+  StakerOperatorUndelegations      StakerOperatorUndelegations[]
+  StakerOperatorForceUndelegations StakerOperatorForceUndelegations[]
 }
 
 model OperatorAvsRegistration {
@@ -61,11 +67,56 @@ model OperatorAvsRegistration {
   blockNumber     Int
   blockTimestamp  Int
   transactionHash String
-  operatorId      Int
-  avsId           Int
 
-  operator Operator @relation(fields: [operatorId], references: [id])
-  avs      Avs      @relation(fields: [avsId], references: [id])
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  avsId      Int
+  avs        Avs      @relation(fields: [avsId], references: [id])
 
   @@index([blockNumber, operatorId, avsId])
+}
+
+model StakerOperatorDelegations {
+  id              Int    @id @default(autoincrement())
+  graphId         String @unique
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  restakerId Int
+  restaker   Restaker @relation(fields: [restakerId], references: [id])
+
+  @@index([blockNumber, operatorId, restakerId])
+}
+
+model StakerOperatorUndelegations {
+  id              Int    @id @default(autoincrement())
+  graphId         String @unique
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  restakerId Int
+  restaker   Restaker @relation(fields: [restakerId], references: [id])
+
+  @@index([blockNumber, operatorId, restakerId])
+}
+
+model StakerOperatorForceUndelegations {
+  id              Int    @id @default(autoincrement())
+  graphId         String @unique
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  restakerId Int
+  restaker   Restaker @relation(fields: [restakerId], references: [id])
+
+  @@index([blockNumber, operatorId, restakerId])
 }
