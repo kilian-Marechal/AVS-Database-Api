@@ -141,6 +141,25 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    updateTotalStakersByOperator: {
+      name: `updateTotalStakersByOperator-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/updateTotalStakersByOperator.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `updateTotalStakersByOperator`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(5 12 * * ? *)'], // Runs every day at 00h05 UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     // Exclude resources from webpack execution

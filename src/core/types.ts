@@ -36,7 +36,6 @@ export type StakerDelegated = {
   blockNumber: string
   blockTimestamp: string
   transactionHash: string
-  __typename: string
 }
 export type GraphStakerDelegationBody = {
   data: {
