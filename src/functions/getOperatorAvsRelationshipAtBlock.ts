@@ -4,8 +4,8 @@ import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
-import { operatorAVSRegistrationStatusUpdated } from '../core/types'
 import { Address } from 'viem'
+import { OperatorAvsRegistrationType } from '../core/types'
 
 type RequestBodyType = {
   blockNumber: number
@@ -15,7 +15,7 @@ type RequestBodyType = {
 }
 type ResponseBodyType = {
   status: 'success'
-  results: operatorAVSRegistrationStatusUpdated[]
+  results: OperatorAvsRegistrationType[]
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -53,17 +53,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     // Fetch the operators and AVS ids based on the provided addresses
-    if (avsAddress !== undefined) {
+    if (sanitizedAvsAddress !== undefined) {
       const avs = await prisma.avs.findUnique({
-        where: { address: avsAddress },
+        where: { address: sanitizedAvsAddress },
         select: { id: true },
       })
       if (!avs) throw new Error('AVS not found')
       whereCondition.avsId = avs.id
     }
-    if (operatorAddress !== undefined) {
+    if (sanitizedOperatorAddress !== undefined) {
       const operator = await prisma.operator.findUnique({
-        where: { address: operatorAddress },
+        where: { address: sanitizedOperatorAddress },
         select: { id: true },
       })
       if (!operator) throw new Error('Operator not found')

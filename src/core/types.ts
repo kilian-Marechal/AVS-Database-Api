@@ -18,3 +18,12 @@ export type GraphOperatorRegistrationBody = {
     message: string
   }[]
 }
+
+export type OperatorAvsRegistrationType = {
+  operator: string
+  avs: string
+  status: boolean
+  blockNumber: number
+  blockTimestamp: number
+  transactionHash: string
+}
