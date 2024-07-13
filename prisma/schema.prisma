@@ -8,6 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Indexations {
+  id                Int      @id @default(autoincrement())
+  entity            String   @unique
+  latestBlockNumber Int
+  updatedAt         DateTime @updatedAt
+}
+
 model Avs {
   id      Int     @id @default(autoincrement())
   address String  @unique
@@ -59,4 +66,6 @@ model OperatorAvsRegistration {
 
   operator Operator @relation(fields: [operatorId], references: [id])
   avs      Avs      @relation(fields: [avsId], references: [id])
+
+  @@index([blockNumber, operatorId, avsId])
 }

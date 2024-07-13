@@ -4,64 +4,39 @@ import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
-
-// TODO Define, also rename endpoint
-type RequestBodyType = {
-  data: {
-    operatorAVSRegistrationStatusUpdateds: {
-      id: string
-      operator: string
-      avs: string
-      status: number
-      blockNumber: string
-      blockTimestamp: string
-      transactionHash: string
-      __typename: string
-    }[]
-  }
-}
+import { operatorAVSRegistrationStatusUpdated } from '../core/types'
+import { getLatestIndexation } from '../core/utils/getLatestIndexation'
+import { fetchNewOperatorAVSStatusUpdates } from '../core/services/fetchNewOperatorAVSStatusUpdates'
 
 type ResponseBodyType = {
   status: 'success'
+  statusChangeEvents: number
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  let parsedBody: RequestBodyType
-
   try {
-    // try to parse JSON body
-    try {
-      parsedBody = JSON.parse(event.body || '') as RequestBodyType
-    } catch (err) {
+    const entityType = 'operatorAvsRegistration'
+    const latestIndexation = await getLatestIndexation(entityType)
+    console.log('----- latestIndexation', latestIndexation)
+
+    const operatorStatusUpdates: operatorAVSRegistrationStatusUpdated[] = await fetchNewOperatorAVSStatusUpdates(
+      latestIndexation ?? 0,
+    )
+
+    if (operatorStatusUpdates.length === 0)
       return httpResponse({
-        statusCode: 400,
+        statusCode: 200,
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'application/json',
         },
-        body: 'Bad Request',
+        body: JSON.stringify({
+          status: 'success',
+          statusChangeEvents: 0,
+        } satisfies ResponseBodyType),
       })
-    }
-
-    const { operatorAVSRegistrationStatusUpdateds } = parsedBody.data
-
-    // // TODO Verify request parameters
-    // if (
-    //   1 === 1
-    //   // !parsedBody.address ||
-    //   // typeof parsedBody.address !== 'string' ||
-    //   // !/^0x[0-9a-fA-F]{40}$/.test(parsedBody.address)
-    // ) {
-    //   return httpResponse({
-    //     statusCode: 400,
-    //     headers: {
-    //       'Content-Type': 'text/plain',
-    //     },
-    //     body: 'Bad Request',
-    //   })
-    // }
 
     // Iterate through the entries and upsert into the database
-    for (const _entry of operatorAVSRegistrationStatusUpdateds) {
+    for (const _entry of operatorStatusUpdates) {
       const { id, operator, avs, status, blockNumber, blockTimestamp, transactionHash } = _entry
 
       const sanitizedOperatorAddress = sanitizeAddress(operator)
@@ -74,8 +49,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         },
         create: {
           address: sanitizedOperatorAddress,
+          avss: {
+            connect: {
+              address: sanitizedAvsAddress,
+            },
+          },
         },
-        update: {},
+        update: {
+          avss: {
+            connect: { address: sanitizedAvsAddress },
+          },
+        },
       })
 
       // Fetch or create the avs entry
@@ -85,8 +69,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         },
         create: {
           address: sanitizedAvsAddress,
+          operators: {
+            connect: {
+              address: sanitizedOperatorAddress,
+            },
+          },
         },
-        update: {},
+        update: {
+          operators: {
+            connect: { address: sanitizedOperatorAddress },
+          },
+        },
       })
 
       const operatorId = operatorEntry.id
@@ -108,6 +101,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     }
 
+    // Update the latest block number in the Indexations table
+    const newlatestBlockNumber = Math.max(...operatorStatusUpdates.map((update) => parseInt(update.blockNumber)))
+    await prisma.indexations.upsert({
+      where: { entity: entityType },
+      create: {
+        entity: entityType,
+        latestBlockNumber: newlatestBlockNumber,
+      },
+      update: {
+        latestBlockNumber: newlatestBlockNumber ?? latestIndexation,
+      },
+    })
+
     return httpResponse({
       statusCode: 200,
       headers: {
@@ -115,12 +121,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
       body: JSON.stringify({
         status: 'success',
+        statusChangeEvents: operatorStatusUpdates.length,
       } satisfies ResponseBodyType),
     })
   } catch (err: any) {
     log.pinoError(err.message, {
+      endpoint: '/operatorStatusUpdate',
       additionalData: {
-        action: 'postEndpointError',
+        action: handler.name,
+        err,
       },
     })
 

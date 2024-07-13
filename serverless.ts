@@ -52,15 +52,33 @@ const serverlessConfiguration: AWS = {
     },
   },
   functions: {
-    // TODO Rename once decided
-    receiveOperatorRegistrationEvents: {
-      name: `receiveOperatorRegistrationEvents-${stage}-${versionTag}-${serviceName}`,
-      handler: 'src/functions/receiveOperatorRegistrationEvents.handler', // Path to worker function
-      timeout: 1, // Timeout in seconds
+    operatorStatusUpdate: {
+      name: `operatorStatusUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/operatorStatusUpdate.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
       events: [
         {
           http: {
-            path: `receiveOperatorRegistrationEvents`,
+            path: `operatorStatusUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
+    getOperatorAvsRelationshipAtBlock: {
+      name: `getOperatorAvsRelationshipAtBlock-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/getOperatorAvsRelationshipAtBlock.handler', // Path to worker function
+      timeout: 30, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `getOperatorAvsRelationshipAtBlock`,
             method: 'post',
           },
         },

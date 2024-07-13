@@ -14,6 +14,8 @@ type BaseEnv = {
   NODE_ENV: string
   NODE_NAME: string
   DATABASE_URL: string
+  AVS_DIRECTORY_SUBGRAPH_URL: string
+  ALL_AVS_SUBGRAPH_URL: string
 }
 
 type AwsEnv = BaseEnv & {
@@ -26,6 +28,8 @@ export function validateEnv(): Readonly<BaseEnv | AwsEnv> {
     NODE_ENV: str({ choices: ['development', 'staging', 'production', 'test'] }),
     NODE_NAME: str(),
     DATABASE_URL: str(),
+    AVS_DIRECTORY_SUBGRAPH_URL: str(),
+    ALL_AVS_SUBGRAPH_URL: str(),
     DEPLOYMENT_AWS_ACCOUNT_ID: str({ default: undefined }),
     DEPLOYMENT_AWS_REGION: str({ default: undefined }),
   })
