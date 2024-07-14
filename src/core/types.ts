@@ -83,3 +83,30 @@ export type GraphOperatorSharesDecreasedBody = Omit<GraphOperatorSharesIncreased
     operatorSharesDecreaseds: OperatorSharesDecreased[]
   }
 }
+
+// **** Token Pricer **** \\
+export type ERC20PricerRequestBody = {
+  chainId: number
+  tokenAddresses: string[]
+}
+
+export type ERC20PricerResponseBody = {
+  status: 'success' | 'no_pool_found'
+  token: string
+  dollarPrice: {
+    price: string
+    decimals: number
+  }
+  enoughLiquidity: boolean
+}[]
+
+export type ERC20PricerTokenInfo = {
+  tokenAddress: string
+  dollarPrice: TokenPrice
+  enoughLiquidity: boolean
+}
+
+export type TokenPrice = {
+  price: string
+  decimals: number
+}

@@ -16,6 +16,7 @@ type BaseEnv = {
   DATABASE_URL: string
   AVS_DIRECTORY_SUBGRAPH_URL: string
   EIGENLAYER_DELEGATION_SUBGRAPH_URL: string
+  ERC20_PRICER_API_URL: string
 }
 
 type AwsEnv = BaseEnv & {
@@ -30,6 +31,7 @@ export function validateEnv(): Readonly<BaseEnv | AwsEnv> {
     DATABASE_URL: str(),
     AVS_DIRECTORY_SUBGRAPH_URL: str(),
     EIGENLAYER_DELEGATION_SUBGRAPH_URL: str(),
+    ERC20_PRICER_API_URL: str(),
     DEPLOYMENT_AWS_ACCOUNT_ID: str({ default: undefined }),
     DEPLOYMENT_AWS_REGION: str({ default: undefined }),
   })

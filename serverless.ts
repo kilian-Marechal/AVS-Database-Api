@@ -97,6 +97,19 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    getSpecificOperatorRestakers: {
+      name: `getSpecificOperatorRestakers-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/getSpecificOperatorRestakers.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `getSpecificOperatorRestakers`,
+            method: 'post',
+          },
+        },
+      ],
+    },
     stakerDelegationsUpdate: {
       name: `stakerDelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/stakerDelegationsUpdate.handler', // Path to worker function

@@ -5,7 +5,6 @@ import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
 import { Address } from 'viem'
-import { OperatorAvsRegistrationType } from '../core/types'
 
 type RequestBodyType = {
   operatorAddress: Address
@@ -13,7 +12,6 @@ type RequestBodyType = {
 type ResponseBodyType = {
   status: 'success'
   restakers: number
-  results: OperatorAvsRegistrationType[]
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -40,33 +38,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const operatorEntry = await prisma.operator.findFirst({
       where: { address: sanitizedOperatorAddress },
       select: {
-        id: true,
         restakerCount: true,
       },
     })
 
     if (!operatorEntry) throw new Error('Could not find requested operator')
-
-    const rawResults = await prisma.operatorAvsRegistration.findMany({
-      where: { operatorId: operatorEntry.id },
-      include: {
-        operator: {
-          select: { address: true },
-        },
-        avs: {
-          select: { address: true },
-        },
-      },
-    })
-
-    const results: OperatorAvsRegistrationType[] = rawResults.map((entry) => ({
-      operator: entry.operator.address,
-      avs: entry.avs.address,
-      status: entry.status,
-      blockNumber: entry.blockNumber,
-      blockTimestamp: entry.blockTimestamp,
-      transactionHash: entry.transactionHash,
-    }))
 
     return httpResponse({
       statusCode: 200,
@@ -75,7 +51,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
       body: JSON.stringify({
         status: 'success',
-        results,
         restakers: operatorEntry.restakerCount,
       } satisfies ResponseBodyType),
     })
