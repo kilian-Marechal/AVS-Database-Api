@@ -76,7 +76,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       body: JSON.stringify({
         status: 'success',
         results,
-        restakers: operatorEntry.restakerCount,
+        restakers: operatorEntry.restakerCount ?? 0,
       } satisfies ResponseBodyType),
     })
   } catch (err: any) {

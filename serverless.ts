@@ -84,6 +84,19 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    getWeeklyRestaskerCountForOperator: {
+      name: `getWeeklyRestaskerCountForOperator-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/getWeeklyRestaskerCountForOperator.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `getWeeklyRestaskerCountForOperator`,
+            method: 'post',
+          },
+        },
+      ],
+    },
     getSpecificOperatorAvsRegistrationEvents: {
       name: `getSpecificOperatorAvsRegistrationEvents-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/getSpecificOperatorAvsRegistrationEvents.handler', // Path to worker function
