@@ -57,3 +57,29 @@ export type GraphStakerForceUndelegationBody = Omit<GraphStakerUndelegationBody,
     stakerForceUndelegateds: StakerForceUndelegated[]
   }
 }
+
+// **** Operator Shares Increased / Decreased **** \\
+export type OperatorSharesIncreased = {
+  id: string
+  staker: string
+  operator: string
+  strategy: string
+  shares: string
+  blockNumber: string
+  blockTimestamp: string
+  transactionHash: string
+}
+export type GraphOperatorSharesIncreasedBody = {
+  data: {
+    operatorSharesIncreaseds: OperatorSharesIncreased[]
+  }
+  errors: {
+    message: string
+  }[]
+}
+export type OperatorSharesDecreased = OperatorSharesIncreased
+export type GraphOperatorSharesDecreasedBody = Omit<GraphOperatorSharesIncreasedBody, 'data'> & {
+  data: {
+    operatorSharesDecreaseds: OperatorSharesDecreased[]
+  }
+}

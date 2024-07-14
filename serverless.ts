@@ -84,6 +84,19 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    getSpecificOperatorAvsRegistrationEvents: {
+      name: `getSpecificOperatorAvsRegistrationEvents-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/getSpecificOperatorAvsRegistrationEvents.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `getSpecificOperatorAvsRegistrationEvents`,
+            method: 'post',
+          },
+        },
+      ],
+    },
     stakerDelegationsUpdate: {
       name: `stakerDelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/stakerDelegationsUpdate.handler', // Path to worker function
@@ -155,6 +168,44 @@ const serverlessConfiguration: AWS = {
         {
           schedule: {
             rate: ['cron(5 12 * * ? *)'], // Runs every day at 00h05 UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
+    operatorSharesIncreasedUpdate: {
+      name: `operatorSharesIncreasedUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/operatorSharesIncreasedUpdate.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `operatorSharesIncreasedUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
+    operatorSharesDecreasedUpdate: {
+      name: `operatorSharesDecreasedUpdate-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/operatorSharesDecreasedUpdate.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `operatorSharesDecreasedUpdate`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(0 12 * * ? *)'], // Runs every day at midnight UTC
             enabled: true,
           },
         },

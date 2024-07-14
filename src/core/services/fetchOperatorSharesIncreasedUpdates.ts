@@ -1,13 +1,13 @@
 import { eigenlayer_delegation_subgraph_url } from '../environment/theGraph'
 import { log } from '../modules/logger'
-import { GraphStakerDelegationBody } from '../types'
+import { GraphOperatorSharesIncreasedBody } from '../types'
 
-export async function fetchStakerDelegationUpdates(latestBlockNumber: number) {
+export async function fetchOperatorSharesIncreasedUpdates(latestBlockNumber: number) {
   if (!eigenlayer_delegation_subgraph_url) throw new Error('eigenlayer_delegation_subgraph_url is undefined')
 
   const QUERY = `
-    query FetchStakerDelegationUpdates($blockNumber: Int!, $first: Int!, $skip: Int!) {
-      stakerDelegateds(
+    query fetchOperatorSharesIncreasedUpdates($blockNumber: Int!, $first: Int!, $skip: Int!) {
+      operatorSharesIncreaseds(
         where: { blockNumber_gt: $blockNumber }
         first: $first
         skip: $skip
@@ -17,6 +17,8 @@ export async function fetchStakerDelegationUpdates(latestBlockNumber: number) {
         id
         staker
         operator
+        strategy
+        shares
         blockNumber
         blockTimestamp
         transactionHash
@@ -33,9 +35,9 @@ export async function fetchStakerDelegationUpdates(latestBlockNumber: number) {
   while (hasMore) {
     if (skip === 5000) {
       log.pinoInfo('Reached 5k skip limit', {
-        endpoint: '/stakerDelegationsUpdate',
+        endpoint: '/operatorSharesIncreasedUpdate',
         additionalData: {
-          action: fetchStakerDelegationUpdates.name,
+          action: fetchOperatorSharesIncreasedUpdates.name,
         },
       })
 
@@ -61,22 +63,22 @@ export async function fetchStakerDelegationUpdates(latestBlockNumber: number) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const { data, errors } = (await response.json()) as GraphStakerDelegationBody
+    const { data, errors } = (await response.json()) as GraphOperatorSharesIncreasedBody
 
     if (errors) {
       throw new Error(`GraphQL error: ${errors.map((error: any) => error.message).join(', ')}`)
     }
 
-    const { stakerDelegateds } = data
+    const { operatorSharesIncreaseds } = data
 
-    if (!stakerDelegateds || stakerDelegateds.length < first) {
+    if (!operatorSharesIncreaseds || operatorSharesIncreaseds.length < first) {
       hasMore = false
     } else {
       skip += first
     }
 
-    if (stakerDelegateds && stakerDelegateds.length > 0) {
-      results.push(...stakerDelegateds)
+    if (operatorSharesIncreaseds && operatorSharesIncreaseds.length > 0) {
+      results.push(...operatorSharesIncreaseds)
     }
   }
 

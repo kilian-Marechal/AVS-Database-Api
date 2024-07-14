@@ -41,10 +41,13 @@ model Operator {
 
   avss                             Avs[]                              @relation("AvsOperators")
   restakers                        Restaker[]                         @relation("OperatorRestakers")
+  strategies                       Strategy[]                         @relation("OperatorStrategies")
   OperatorAvsRegistration          OperatorAvsRegistration[]
   StakerOperatorDelegations        StakerOperatorDelegations[]
   StakerOperatorUndelegations      StakerOperatorUndelegations[]
   StakerOperatorForceUndelegations StakerOperatorForceUndelegations[]
+  OperatorSharesDecreased          OperatorSharesDecreased[]
+  OperatorSharesIncreased          OperatorSharesIncreased[]
 }
 
 model Restaker {
@@ -58,6 +61,18 @@ model Restaker {
   StakerOperatorDelegations        StakerOperatorDelegations[]
   StakerOperatorUndelegations      StakerOperatorUndelegations[]
   StakerOperatorForceUndelegations StakerOperatorForceUndelegations[]
+  OperatorSharesDecreased          OperatorSharesDecreased[]
+  OperatorSharesIncreased          OperatorSharesIncreased[]
+}
+
+model Strategy {
+  id            Int    @id @default(autoincrement())
+  address       String @unique
+  tokenEthValue Float?
+
+  operators               Operator[]                @relation("OperatorStrategies")
+  OperatorSharesDecreased OperatorSharesDecreased[]
+  OperatorSharesIncreased OperatorSharesIncreased[]
 }
 
 model OperatorAvsRegistration {
@@ -119,4 +134,38 @@ model StakerOperatorForceUndelegations {
   restaker   Restaker @relation(fields: [restakerId], references: [id])
 
   @@index([blockNumber, operatorId, restakerId])
+}
+
+model OperatorSharesIncreased {
+  id              Int    @id @default(autoincrement())
+  graphId         String @unique
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+
+  shares String
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  restakerId Int
+  restaker   Restaker @relation(fields: [restakerId], references: [id])
+  strategyId Int
+  strategy   Strategy @relation(fields: [strategyId], references: [id])
+}
+
+model OperatorSharesDecreased {
+  id              Int    @id @default(autoincrement())
+  graphId         String @unique
+  blockNumber     Int
+  blockTimestamp  Int
+  transactionHash String
+
+  shares String
+
+  operatorId Int
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  restakerId Int
+  restaker   Restaker @relation(fields: [restakerId], references: [id])
+  strategyId Int
+  strategy   Strategy @relation(fields: [strategyId], references: [id])
 }
