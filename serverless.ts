@@ -55,7 +55,7 @@ const serverlessConfiguration: AWS = {
     operatorStatusUpdate: {
       name: `operatorStatusUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/operatorStatusUpdate.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {
@@ -74,7 +74,7 @@ const serverlessConfiguration: AWS = {
     getOperatorAvsRelationshipAtBlock: {
       name: `getOperatorAvsRelationshipAtBlock-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/getOperatorAvsRelationshipAtBlock.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {
@@ -87,7 +87,7 @@ const serverlessConfiguration: AWS = {
     stakerDelegationsUpdate: {
       name: `stakerDelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/stakerDelegationsUpdate.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {
@@ -106,7 +106,7 @@ const serverlessConfiguration: AWS = {
     stakerUndelegationsUpdate: {
       name: `stakerUndelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/stakerUndelegationsUpdate.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {
@@ -125,7 +125,7 @@ const serverlessConfiguration: AWS = {
     stakerForceUndelegationsUpdate: {
       name: `stakerForceUndelegationsUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/stakerForceUndelegationsUpdate.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {
@@ -144,7 +144,7 @@ const serverlessConfiguration: AWS = {
     updateTotalStakersByOperator: {
       name: `updateTotalStakersByOperator-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/updateTotalStakersByOperator.handler', // Path to worker function
-      timeout: 30, // Timeout in seconds
+      timeout: 900, // Timeout in seconds
       events: [
         {
           http: {

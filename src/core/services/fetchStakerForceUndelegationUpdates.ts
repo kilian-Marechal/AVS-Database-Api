@@ -1,4 +1,5 @@
 import { eigenlayer_delegation_subgraph_url } from '../environment/theGraph'
+import { log } from '../modules/logger'
 import { GraphStakerForceUndelegationBody } from '../types'
 
 export async function fetchStakerForceUndelegationUpdates(latestBlockNumber: number) {
@@ -13,6 +14,7 @@ export async function fetchStakerForceUndelegationUpdates(latestBlockNumber: num
           orderBy: blockNumber
           orderDirection: asc
         ) {
+          id
           staker
           operator
           blockNumber
@@ -29,6 +31,17 @@ export async function fetchStakerForceUndelegationUpdates(latestBlockNumber: num
   const results = []
 
   while (hasMore) {
+    if (skip === 5000) {
+      log.pinoInfo('Reached 5k skip limit', {
+        endpoint: '/stakerForceUndelegationsUpdate',
+        additionalData: {
+          action: fetchStakerForceUndelegationUpdates.name,
+        },
+      })
+
+      return { results, hasMore }
+    }
+
     const response = await fetch(eigenlayer_delegation_subgraph_url, {
       method: 'POST',
       headers: {
@@ -56,14 +69,16 @@ export async function fetchStakerForceUndelegationUpdates(latestBlockNumber: num
 
     const { stakerForceUndelegateds } = data
 
-    if (stakerForceUndelegateds.length < first) {
+    if (!stakerForceUndelegateds || stakerForceUndelegateds.length < first) {
       hasMore = false
     } else {
       skip += first
     }
 
-    results.push(...stakerForceUndelegateds)
+    if (stakerForceUndelegateds && stakerForceUndelegateds.length > 0) {
+      results.push(...stakerForceUndelegateds)
+    }
   }
 
-  return results
+  return { results, hasMore }
 }

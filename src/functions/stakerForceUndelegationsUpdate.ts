@@ -19,7 +19,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const latestIndexation = await getLatestIndexation(entityType)
     console.log('----- latestIndexation', latestIndexation)
 
-    const stakerOperatorForceUndelegations: StakerForceUndelegated[] = await fetchStakerForceUndelegationUpdates(
+    // TODO if hasMore, use step-function to recursively continue the indexation
+    const { results: stakerOperatorForceUndelegations, hasMore } = await fetchStakerForceUndelegationUpdates(
       latestIndexation ?? 0,
     )
 
@@ -42,7 +43,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       const sanitizedStakerAddress = sanitizeAddress(staker)
       const sanitizedOperatorAddress = sanitizeAddress(operator)
 
-      // Fetch or create the operator entry
+      // Fetch or create the restaker entry
+      const restakerEntry = await prisma.restaker.upsert({
+        where: {
+          address: sanitizedStakerAddress,
+        },
+        create: {
+          address: sanitizedStakerAddress,
+        },
+        update: {},
+      })
+
+      // Fetch or create the operator entry (and connect)
       const operatorEntry = await prisma.operator.upsert({
         where: {
           address: sanitizedOperatorAddress,
@@ -58,26 +70,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         update: {
           restakers: {
             connect: { address: sanitizedStakerAddress },
-          },
-        },
-      })
-
-      // Fetch or create the restaker entry
-      const restakerEntry = await prisma.restaker.upsert({
-        where: {
-          address: sanitizedStakerAddress,
-        },
-        create: {
-          address: sanitizedStakerAddress,
-          operators: {
-            connect: {
-              address: sanitizedOperatorAddress,
-            },
-          },
-        },
-        update: {
-          operators: {
-            connect: { address: sanitizedOperatorAddress },
           },
         },
       })
@@ -104,6 +96,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const newlatestBlockNumber = Math.max(
       ...stakerOperatorForceUndelegations.map((update) => parseInt(update.blockNumber)),
     )
+    log.pinoInfo('newlatestIndexation', {
+      endpoint: '/stakerForceUndelegationsUpdate',
+      additionalData: {
+        action: handler.name,
+        newlatestBlockNumber,
+      },
+    })
     await prisma.indexations.upsert({
       where: { entity: entityType },
       create: {
@@ -127,7 +126,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     })
   } catch (err: any) {
     log.pinoError(err.message, {
-      endpoint: '/stakerDelegationsUpdate',
+      endpoint: '/stakerForceUndelegationsUpdate',
       additionalData: {
         action: handler.name,
         err,

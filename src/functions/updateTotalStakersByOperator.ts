@@ -14,20 +14,50 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const delegations = await prisma.stakerOperatorDelegations.findMany({
       include: {
-        operator: true,
-        restaker: true,
+        operator: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
+        restaker: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
       },
     })
     const undelegations = await prisma.stakerOperatorUndelegations.findMany({
       include: {
-        operator: true,
-        restaker: true,
+        operator: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
+        restaker: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
       },
     })
     const forceUndelegations = await prisma.stakerOperatorForceUndelegations.findMany({
       include: {
-        operator: true,
-        restaker: true,
+        operator: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
+        restaker: {
+          select: {
+            id: true,
+            address: true,
+          },
+        },
       },
     })
 
@@ -67,7 +97,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       endpoint: '/updateTotalStakersByOperator',
       additionalData: {
         action: handler.name,
-        stakersByOperator: Array.from(stakersByOperator),
+        stakersByOperator: stakersByOperator.size,
       },
     })
 

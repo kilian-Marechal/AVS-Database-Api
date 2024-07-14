@@ -4,7 +4,6 @@ import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
-import { StakerDelegated } from '../core/types'
 import { getLatestIndexation } from '../core/utils/getLatestIndexation'
 import { fetchStakerDelegationUpdates } from '../core/services/fetchStakerDelegationUpdates'
 
@@ -19,7 +18,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const latestIndexation = await getLatestIndexation(entityType)
     console.log('----- latestIndexation', latestIndexation)
 
-    const stakerOperatorDelegations: StakerDelegated[] = await fetchStakerDelegationUpdates(latestIndexation ?? 0)
+    // TODO if hasMore, use step-function to recursively continue the indexation
+    const { results: stakerOperatorDelegations, hasMore } = await fetchStakerDelegationUpdates(latestIndexation ?? 0)
 
     if (stakerOperatorDelegations.length === 0)
       return httpResponse({
@@ -40,7 +40,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       const sanitizedStakerAddress = sanitizeAddress(staker)
       const sanitizedOperatorAddress = sanitizeAddress(operator)
 
-      // Fetch or create the operator entry
+      // Fetch or create the restaker entry
+      const restakerEntry = await prisma.restaker.upsert({
+        where: {
+          address: sanitizedStakerAddress,
+        },
+        create: {
+          address: sanitizedStakerAddress,
+        },
+        update: {},
+      })
+
+      // Fetch or create the operator entry (and connect)
       const operatorEntry = await prisma.operator.upsert({
         where: {
           address: sanitizedOperatorAddress,
@@ -56,26 +67,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         update: {
           restakers: {
             connect: { address: sanitizedStakerAddress },
-          },
-        },
-      })
-
-      // Fetch or create the restaker entry
-      const restakerEntry = await prisma.restaker.upsert({
-        where: {
-          address: sanitizedStakerAddress,
-        },
-        create: {
-          address: sanitizedStakerAddress,
-          operators: {
-            connect: {
-              address: sanitizedOperatorAddress,
-            },
-          },
-        },
-        update: {
-          operators: {
-            connect: { address: sanitizedOperatorAddress },
           },
         },
       })
@@ -100,6 +91,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // Update the latest block number in the Indexations table
     const newlatestBlockNumber = Math.max(...stakerOperatorDelegations.map((update) => parseInt(update.blockNumber)))
+    log.pinoInfo('newlatestIndexation', {
+      endpoint: '/stakerDelegationsUpdate',
+      additionalData: {
+        action: handler.name,
+        newlatestBlockNumber,
+      },
+    })
+
     await prisma.indexations.upsert({
       where: { entity: entityType },
       create: {
@@ -126,7 +125,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       endpoint: '/stakerDelegationsUpdate',
       additionalData: {
         action: handler.name,
-        err,
+        error: (err as Error).message,
       },
     })
 

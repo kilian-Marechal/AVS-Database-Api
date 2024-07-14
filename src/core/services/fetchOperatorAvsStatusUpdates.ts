@@ -6,7 +6,7 @@ export async function fetchOperatorAvsStatusUpdates(latestBlockNumber: number) {
 
   const QUERY = `
     query FetchOperatorAVSRegistrations($blockNumber: Int!, $first: Int!, $skip: Int!) {
-      OperatorAVSRegistrationStatusUpdateds(
+      operatorAVSRegistrationStatusUpdateds(
         where: { blockNumber_gt: $blockNumber }
         first: $first
         skip: $skip
@@ -56,15 +56,17 @@ export async function fetchOperatorAvsStatusUpdates(latestBlockNumber: number) {
       throw new Error(`GraphQL error: ${errors.map((error: any) => error.message).join(', ')}`)
     }
 
-    const { OperatorAVSRegistrationStatusUpdateds } = data
+    const { operatorAVSRegistrationStatusUpdateds } = data
 
-    if (OperatorAVSRegistrationStatusUpdateds.length < first) {
+    if (!operatorAVSRegistrationStatusUpdateds || operatorAVSRegistrationStatusUpdateds.length < first) {
       hasMore = false
     } else {
       skip += first
     }
 
-    results.push(...OperatorAVSRegistrationStatusUpdateds)
+    if (operatorAVSRegistrationStatusUpdateds && operatorAVSRegistrationStatusUpdateds.length > 0) {
+      results.push(...operatorAVSRegistrationStatusUpdateds)
+    }
   }
 
   return results

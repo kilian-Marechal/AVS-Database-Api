@@ -42,26 +42,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       const sanitizedOperatorAddress = sanitizeAddress(operator)
       const sanitizedAvsAddress = sanitizeAddress(avs)
 
-      // Fetch or create the operator entry
-      const operatorEntry = await prisma.operator.upsert({
-        where: {
-          address: sanitizedOperatorAddress,
-        },
-        create: {
-          address: sanitizedOperatorAddress,
-          avss: {
-            connect: {
-              address: sanitizedAvsAddress,
-            },
-          },
-        },
-        update: {
-          avss: {
-            connect: { address: sanitizedAvsAddress },
-          },
-        },
-      })
-
       // Fetch or create the avs entry
       const avsEntry = await prisma.avs.upsert({
         where: {
@@ -69,21 +49,43 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         },
         create: {
           address: sanitizedAvsAddress,
-          operators: {
-            connect: {
-              address: sanitizedOperatorAddress,
-            },
-          },
         },
-        update: {
-          operators: {
-            connect: { address: sanitizedOperatorAddress },
-          },
+        update: {},
+      })
+
+      // Fetch or create the operator entry
+      const operatorEntry = await prisma.operator.upsert({
+        where: {
+          address: sanitizedOperatorAddress,
         },
+        create: {
+          address: sanitizedOperatorAddress,
+        },
+        update: {},
       })
 
       const operatorId = operatorEntry.id
       const avsId = avsEntry.id
+
+      // Connect the operator to the avs
+      await prisma.operator.update({
+        where: { id: operatorId },
+        data: {
+          avss: {
+            connect: { id: avsId },
+          },
+        },
+      })
+
+      // Connect the avs to the operator
+      await prisma.avs.update({
+        where: { id: avsId },
+        data: {
+          operators: {
+            connect: { id: operatorId },
+          },
+        },
+      })
 
       // Upsert the entry into the database
       await prisma.operatorAvsRegistration.upsert({

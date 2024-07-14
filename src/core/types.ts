@@ -12,7 +12,7 @@ export type OperatorAVSRegistrationStatusUpdated = {
 
 export type GraphOperatorRegistrationBody = {
   data: {
-    OperatorAVSRegistrationStatusUpdateds: OperatorAVSRegistrationStatusUpdated[]
+    operatorAVSRegistrationStatusUpdateds: OperatorAVSRegistrationStatusUpdated[]
   }
   errors: {
     message: string
