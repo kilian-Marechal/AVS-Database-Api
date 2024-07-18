@@ -107,6 +107,17 @@ export type ERC20PricerTokenInfo = {
 }
 
 export type TokenPrice = {
-  price: string
-  decimals: number
+  tokenAddress: string
+  dollarPrice: {
+    price: string
+    decimals: number
+  }
+  enoughLiquidity: boolean
+}
+
+// Shares, Tokens, Values
+export type TokensByOperator = Map<string, Map<string, number>>
+
+export type StrategyValues = {
+  usdValue: number
 }

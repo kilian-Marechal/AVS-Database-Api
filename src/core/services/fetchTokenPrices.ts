@@ -1,8 +1,7 @@
-import { Hex } from 'viem'
 import { erc20_pricer_api_url } from '../environment/tokenPricer'
-import { ERC20PricerRequestBody, ERC20PricerResponseBody } from '../types'
+import { ERC20PricerRequestBody, ERC20PricerResponseBody, TokenPrice } from '../types'
 
-export async function fetchTokenPrices(tokenAddresses: Hex[], chainId: number) {
+export async function fetchTokenPrices(tokenAddresses: string[], chainId: number): Promise<TokenPrice[]> {
   try {
     const requestBody: ERC20PricerRequestBody = { chainId, tokenAddresses }
 

@@ -199,6 +199,25 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    updateTotalSharesAndValuesByOperator: {
+      name: `updateTotalSharesAndValuesByOperator-${stage}-${versionTag}-${serviceName}`,
+      handler: 'src/functions/updateTotalSharesAndValuesByOperator.handler', // Path to worker function
+      timeout: 900, // Timeout in seconds
+      events: [
+        {
+          http: {
+            path: `updateTotalSharesAndValuesByOperator`,
+            method: 'get',
+          },
+        },
+        {
+          schedule: {
+            rate: ['cron(5 12 * * ? *)'], // Runs every day at 00h05 UTC
+            enabled: true,
+          },
+        },
+      ],
+    },
     operatorSharesIncreasedUpdate: {
       name: `operatorSharesIncreasedUpdate-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/operatorSharesIncreasedUpdate.handler', // Path to worker function

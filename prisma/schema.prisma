@@ -48,6 +48,7 @@ model Operator {
   StakerOperatorForceUndelegations StakerOperatorForceUndelegations[]
   OperatorSharesDecreased          OperatorSharesDecreased[]
   OperatorSharesIncreased          OperatorSharesIncreased[]
+  OperatorStrategy                 OperatorStrategy[]
 }
 
 model Restaker {
@@ -73,6 +74,7 @@ model Strategy {
   operators               Operator[]                @relation("OperatorStrategies")
   OperatorSharesDecreased OperatorSharesDecreased[]
   OperatorSharesIncreased OperatorSharesIncreased[]
+  OperatorStrategy        OperatorStrategy[]
 }
 
 model OperatorAvsRegistration {
@@ -168,4 +170,17 @@ model OperatorSharesDecreased {
   restaker   Restaker @relation(fields: [restakerId], references: [id])
   strategyId Int
   strategy   Strategy @relation(fields: [strategyId], references: [id])
+}
+
+model OperatorStrategy {
+  id          Int      @id @default(autoincrement())
+  operator    Operator @relation(fields: [operatorId], references: [id])
+  operatorId  Int
+  strategy    Strategy @relation(fields: [strategyId], references: [id])
+  strategyId  Int
+  tokenAmount Float
+  usdValue    Float
+  updatedAt   DateTime @updatedAt
+
+  @@unique([operatorId, strategyId])
 }
