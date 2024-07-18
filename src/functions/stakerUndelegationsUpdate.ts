@@ -23,6 +23,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       latestIndexation ?? 0,
     )
 
+    if (hasMore) {
+      await sendDiscordReport(new Error('stakerUndelegationsUpdate has more'))
+    }
+
     if (StakerOperatorUndelegations.length === 0)
       return httpResponse({
         statusCode: 200,

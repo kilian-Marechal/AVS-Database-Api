@@ -35,7 +35,7 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs18.x',
     // @ts-ignore
     region: awsRegion,
-    profile: 'hackathon-july-2024',
+    profile: 'nefture-security',
     stage: `${stage}-${versionTag}`,
     tags: {
       // TODO add tags
@@ -98,7 +98,7 @@ const serverlessConfiguration: AWS = {
       ],
     },
     getSpecificOperatorAvsRegistrationEvents: {
-      name: `getSpecificOperatorAvsRegistrationEvents-${stage}-${versionTag}-${serviceName}`,
+      name: `getSpeOpAvsRegistrationEv-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/getSpecificOperatorAvsRegistrationEvents.handler', // Path to worker function
       timeout: 900, // Timeout in seconds
       events: [
@@ -111,7 +111,7 @@ const serverlessConfiguration: AWS = {
       ],
     },
     getSpecificOperatorRestakers: {
-      name: `getSpecificOperatorRestakers-${stage}-${versionTag}-${serviceName}`,
+      name: `getSpeOpRestakers-${stage}-${versionTag}-${serviceName}`,
       handler: 'src/functions/getSpecificOperatorRestakers.handler', // Path to worker function
       timeout: 900, // Timeout in seconds
       events: [

@@ -9,4 +9,4 @@ export const awsRegion = process.env.DEPLOYMENT_AWS_REGION
 export const versionTag = `v${version.split('.')[0]}`
 
 // [TEMPLATE] change this to the service's name
-export const serviceName = 'AVS-Database-Api'
+export const serviceName = 'avs-db-Api'

@@ -21,6 +21,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     // TODO if hasMore, use step-function to recursively continue the indexation
     const { results: stakerOperatorDelegations, hasMore } = await fetchStakerDelegationUpdates(latestIndexation ?? 0)
 
+    if (hasMore) {
+      await sendDiscordReport(new Error('stakerDelegationsUpdate has more'))
+    }
+
     if (stakerOperatorDelegations.length === 0)
       return httpResponse({
         statusCode: 200,

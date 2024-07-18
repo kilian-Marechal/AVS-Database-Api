@@ -6,6 +6,7 @@ import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
 import { getLatestIndexation } from '../core/utils/getLatestIndexation'
 import { fetchOperatorSharesDecreasedUpdates } from '../core/services/fetchOperatorSharesDecreasedUpdates'
+import { relaunchLambda } from '../core/services/aws'
 
 type ResponseBodyType = {
   status: 'success'
@@ -22,6 +23,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const { results: operatorSharesDecreased, hasMore } = await fetchOperatorSharesDecreasedUpdates(
       latestIndexation ?? 0,
     )
+
+    if (hasMore) {
+      await sendDiscordReport(new Error('operatorSharesDecreasedUpdates has more'))
+    }
 
     if (operatorSharesDecreased.length === 0)
       return httpResponse({
