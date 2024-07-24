@@ -19,6 +19,8 @@ type BaseEnv = {
   ERC20_PRICER_API_URL: string
   ETH_RPC_URL: string
   ARB_RPC_URL: string
+  DISCORD_REPORT_WEBHOOK: string
+  DISCORD_MESSAGE_WEBHOOK: string
 }
 
 type AwsEnv = BaseEnv & {
@@ -36,6 +38,8 @@ export function validateEnv(): Readonly<BaseEnv | AwsEnv> {
     ERC20_PRICER_API_URL: str(),
     ETH_RPC_URL: str(),
     ARB_RPC_URL: str(),
+    DISCORD_REPORT_WEBHOOK: str(),
+    DISCORD_MESSAGE_WEBHOOK: str(),
     DEPLOYMENT_AWS_ACCOUNT_ID: str({ default: undefined }),
     DEPLOYMENT_AWS_REGION: str({ default: undefined }),
   })

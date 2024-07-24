@@ -4,6 +4,8 @@ import { computeStrategyValuesForOperators } from '../core/utils/computeStrategy
 import { computeTotalSharesByOperatorForBlock } from '../core/utils/computeTotalSharesByOperator'
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/updateTotalSharesAndValuesByOperator'
+
   try {
     const chainId = 1 // Our graphs are on mainnet only atm
 

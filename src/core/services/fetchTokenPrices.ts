@@ -7,7 +7,7 @@ export async function fetchTokenPrices(tokenAddresses: string[], chainId: number
 
     console.log('ERC20 pricer request body ', requestBody)
 
-    const response = await fetch(`${erc20_pricer_api_url}/getPrices` ?? '', {
+    const response = await fetch(`${erc20_pricer_api_url}/getPrices`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

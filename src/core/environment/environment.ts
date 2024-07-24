@@ -2,8 +2,8 @@ export const environment = process.env.NODE_ENV
 export const isLocal = environment === 'development'
 export const isStaging = environment === 'staging'
 export const isProd = environment === 'production'
+export const isTest = environment === 'test'
 
-if (environment !== 'production' && environment !== 'staging' && environment !== 'development')
-  throw new Error("couldn't find stage")
+export const stage = isProd ? 'prod' : isStaging ? 'staging' : 'dev'
 
-export const stage = environment === 'production' ? 'prod' : environment === 'staging' ? 'staging' : 'dev'
+export const envName = process.env.NODE_NAME

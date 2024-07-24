@@ -1,16 +1,18 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { httpResponse } from '../core/utils/response'
-import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { computeTotalStakersByOperatorForBlock } from '../core/utils/computeTotalStakersByOperator'
 import { StakerDelegated, StakerUndelegated, StakerForceUndelegated } from '../core/types'
 import { prisma } from '../core/environment/prisma'
+import { Gravity, sendDiscordReport } from '../core/modules/discord'
 
 type ResponseBodyType = {
   status: 'success'
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/updateTotalStakersByOperator'
+
   try {
     const delegations = await prisma.stakerOperatorDelegations.findMany({
       include: {
@@ -118,16 +120,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         status: 'success',
       } satisfies ResponseBodyType),
     })
-  } catch (err: any) {
-    log.pinoError(err.message, {
-      endpoint: '/stakerDelegationsUpdate',
+  } catch (error: any) {
+    log.pinoError(error.message, {
+      endpoint: functionOrigin,
       additionalData: {
         action: handler.name,
-        err,
+        error,
       },
     })
 
-    await sendDiscordReport(err as Error)
+    await sendDiscordReport(functionOrigin, error, Gravity.High)
 
     return httpResponse({
       statusCode: 500,

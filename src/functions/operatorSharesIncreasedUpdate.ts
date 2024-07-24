@@ -1,11 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { httpResponse } from '../core/utils/response'
-import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
 import { getLatestIndexation } from '../core/utils/getLatestIndexation'
 import { fetchOperatorSharesIncreasedUpdates } from '../core/services/fetchOperatorSharesIncreasedUpdates'
+import { Gravity, sendDiscordMessage, sendDiscordReport } from '../core/modules/discord'
 
 type ResponseBodyType = {
   status: 'success'
@@ -13,6 +13,8 @@ type ResponseBodyType = {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/operatorSharesIncreasedUpdate'
+
   try {
     const entityType = 'operatorSharesIncreased'
     const latestIndexation = await getLatestIndexation(entityType)
@@ -24,7 +26,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     )
 
     if (hasMore) {
-      await sendDiscordReport(new Error('operatorSharesIncreasedUpdate has more'))
+      await sendDiscordMessage(`${functionOrigin} has more`, `${functionOrigin} should be launched again`)
     }
 
     if (operatorSharesIncreased.length === 0)
@@ -151,16 +153,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         statusChangeEvents: operatorSharesIncreased.length,
       } satisfies ResponseBodyType),
     })
-  } catch (err: any) {
-    log.pinoError(err.message, {
-      endpoint: '/stakerDelegationsUpdate',
+  } catch (error: any) {
+    log.pinoError(error.message, {
+      endpoint: functionOrigin,
       additionalData: {
         action: handler.name,
-        error: (err as Error).message,
+        error,
       },
     })
 
-    await sendDiscordReport(err as Error)
+    await sendDiscordReport(functionOrigin, error, Gravity.High)
 
     return httpResponse({
       statusCode: 500,

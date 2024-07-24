@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { httpResponse } from '../core/utils/response'
-import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { computeTotalStakersByOperatorForBlock } from '../core/utils/computeTotalStakersByOperator'
 import { StakerDelegated, StakerUndelegated, StakerForceUndelegated } from '../core/types'
 import { prisma } from '../core/environment/prisma'
 import { provider } from '../core/environment/provider'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
+import { Gravity, sendDiscordReport } from '../core/modules/discord'
 
 type ResponseBodyType = {
   status: 'success'
@@ -17,6 +17,8 @@ const START_BLOCK_NUMBER = 17445563
 const BLOCKS_PER_WEEK = Math.floor((60 * 60 * 24 * 7) / 12) // Approximate number of blocks in a week
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/getWeeklyRestaskerCountForOperator'
+
   try {
     const { operatorAddress } = JSON.parse(event.body || '{}')
 
@@ -175,16 +177,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         stakerCountsByWeek,
       } satisfies ResponseBodyType),
     })
-  } catch (err: any) {
-    log.pinoError(err.message, {
-      endpoint: '/stakerDelegationsUpdate',
+  } catch (error: any) {
+    log.pinoError(error.message, {
+      endpoint: functionOrigin,
       additionalData: {
         action: handler.name,
-        err,
+        error,
       },
     })
 
-    await sendDiscordReport(err as Error)
+    await sendDiscordReport(functionOrigin, error, Gravity.High)
 
     return httpResponse({
       statusCode: 500,

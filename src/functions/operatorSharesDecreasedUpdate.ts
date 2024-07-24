@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { httpResponse } from '../core/utils/response'
-import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
 import { getLatestIndexation } from '../core/utils/getLatestIndexation'
 import { fetchOperatorSharesDecreasedUpdates } from '../core/services/fetchOperatorSharesDecreasedUpdates'
 import { relaunchLambda } from '../core/services/aws'
+import { Gravity, sendDiscordMessage, sendDiscordReport } from '../core/modules/discord'
 
 type ResponseBodyType = {
   status: 'success'
@@ -14,6 +14,8 @@ type ResponseBodyType = {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/operatorSharesDecreasedUpdate'
+
   try {
     const entityType = 'operatorSharesDecreased'
     const latestIndexation = await getLatestIndexation(entityType)
@@ -25,7 +27,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     )
 
     if (hasMore) {
-      await sendDiscordReport(new Error('operatorSharesDecreasedUpdates has more'))
+      await sendDiscordMessage(`${functionOrigin} has more`, `${functionOrigin} should be launched again`)
     }
 
     if (operatorSharesDecreased.length === 0)
@@ -152,16 +154,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         statusChangeEvents: operatorSharesDecreased.length,
       } satisfies ResponseBodyType),
     })
-  } catch (err: any) {
-    log.pinoError(err.message, {
-      endpoint: '/stakerDelegationsUpdate',
+  } catch (error: any) {
+    log.pinoError(error.message, {
+      endpoint: functionOrigin,
       additionalData: {
         action: handler.name,
-        error: (err as Error).message,
+        error,
       },
     })
 
-    await sendDiscordReport(err as Error)
+    await sendDiscordReport(functionOrigin, error, Gravity.High)
 
     return httpResponse({
       statusCode: 500,

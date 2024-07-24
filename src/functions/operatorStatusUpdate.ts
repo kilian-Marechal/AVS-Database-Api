@@ -1,12 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { httpResponse } from '../core/utils/response'
-import { sendDiscordReport } from '../core/modules/discord'
 import { log } from '../core/modules/logger'
 import { prisma } from '../core/environment/prisma'
 import { sanitizeAddress } from '../core/utils/sanitizeAddress'
 import { OperatorAVSRegistrationStatusUpdated } from '../core/types'
 import { getLatestIndexation } from '../core/utils/getLatestIndexation'
 import { fetchOperatorAvsStatusUpdates } from '../core/services/fetchOperatorAvsStatusUpdates'
+import { Gravity, sendDiscordReport } from '../core/modules/discord'
 
 type ResponseBodyType = {
   status: 'success'
@@ -14,6 +14,8 @@ type ResponseBodyType = {
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const functionOrigin = '/operatorStatusUpdate'
+
   try {
     const entityType = 'operatorAvsRegistration'
     const latestIndexation = await getLatestIndexation(entityType)
@@ -126,16 +128,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         statusChangeEvents: operatorStatusUpdates.length,
       } satisfies ResponseBodyType),
     })
-  } catch (err: any) {
-    log.pinoError(err.message, {
-      endpoint: '/operatorStatusUpdate',
+  } catch (error: any) {
+    log.pinoError(error.message, {
+      endpoint: functionOrigin,
       additionalData: {
         action: handler.name,
-        err,
+        error,
       },
     })
 
-    await sendDiscordReport(err as Error)
+    await sendDiscordReport(functionOrigin, error, Gravity.High)
 
     return httpResponse({
       statusCode: 500,
